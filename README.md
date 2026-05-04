@@ -24,7 +24,7 @@ JAR после сборки:
 
 `target/scala-2.13/spark-logical-plan-capture-v2_2.13-0.1.0.jar`
 
-## Подключение в PySpark 3.5.2
+## Подключение в PySpark 3.5.2 (Python 3.11, Scala 2.13)
 
 ```python
 from pyspark.sql import SparkSession
@@ -38,8 +38,8 @@ spark = (
     )
     .config(
         "spark.sql.extensions",
-        "com.example.spark.plan.LogicalPlanCaptureExtension"
-    )
+        "com.acme.OtherSparkExtension"
+    )  # будет дополнено нашим extension, а не затерто
     .getOrCreate()
 )
 

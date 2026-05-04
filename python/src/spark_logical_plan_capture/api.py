@@ -25,10 +25,15 @@ def jar_path() -> str:
 
 def configure_spark_builder(builder: SparkSession.Builder) -> SparkSession.Builder:
     current_jars = builder._options.get("spark.jars", "")
+    current_extensions = builder._options.get("spark.sql.extensions", "")
     ext_jar = jar_path()
     merged_jars = ",".join([v for v in [current_jars, ext_jar] if v])
+    extension_values = [v.strip() for v in current_extensions.split(",") if v.strip()]
+    if EXTENSION_CLASS not in extension_values:
+        extension_values.append(EXTENSION_CLASS)
+    merged_extensions = ",".join(extension_values)
     builder = builder.config("spark.jars", merged_jars)
-    builder = builder.config("spark.sql.extensions", EXTENSION_CLASS)
+    builder = builder.config("spark.sql.extensions", merged_extensions)
     return builder
 
 

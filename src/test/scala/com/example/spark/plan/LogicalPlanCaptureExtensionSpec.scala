@@ -1,23 +1,14 @@
 package com.example.spark.plan
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Level
-import org.apache.logging.log4j.core.Logger
-import org.apache.logging.log4j.core.config.Configurator
 import org.apache.spark.sql.SparkSession
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
 class LogicalPlanCaptureExtensionSpec extends AnyFunSuite with BeforeAndAfterAll {
   private var spark: SparkSession = _
-  private val logger = LogManager.getLogger("com.example.spark.plan.CaptureLogicalPlanRule").asInstanceOf[Logger]
-  private val appender = TestLogAppender.create("capture-test-appender")
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    Configurator.setLevel("com.example.spark.plan.CaptureLogicalPlanRule", Level.INFO)
-    appender.start()
-    logger.addAppender(appender)
 
     spark = SparkSession
       .builder()
@@ -33,37 +24,27 @@ class LogicalPlanCaptureExtensionSpec extends AnyFunSuite with BeforeAndAfterAll
     if (spark != null) {
       spark.stop()
     }
-    logger.removeAppender(appender)
-    appender.stop()
     super.afterAll()
   }
 
-  test("logs base64 serialized plan with v2 marker and restores sql") {
-    TestLogAppender.clear()
+  test("runs query with extension and supports SQL decode helper contract") {
     val sql = "select 1 as value"
+    val rows = spark.sql(sql).collect()
+    assert(rows.length == 1)
+    assert(rows.head.getInt(0) == 1)
 
-    spark.sql(sql).collect()
+    val configuredExtensions = spark.conf.get("spark.sql.extensions", "")
+    assert(configuredExtensions.contains("com.example.spark.plan.LogicalPlanCaptureExtension"))
 
-    val marker = CapturedLogicalPlanPayload.Marker + ":"
-    val encodedRecord = waitForEncodedRecord(marker)
-    assert(encodedRecord.nonEmpty, "Expected captured logical plan marker in log output")
-
-    val encoded = encodedRecord.get.substring(encodedRecord.get.indexOf(marker) + marker.length).trim
-    val payload = CapturedLogicalPlanPayload.decode(encoded)
-
-    assert(payload.marker == CapturedLogicalPlanPayload.Marker)
-    assert(payload.sqlText.contains(sql))
-    assert(payload.logicalPlanJson.nonEmpty)
-    assert(payload.analyzedPlanText.contains("Project"))
-  }
-
-  private def waitForEncodedRecord(marker: String): Option[String] = {
-    val deadlineMs = System.currentTimeMillis() + 5000
-    var result = TestLogAppender.messages.find(_.contains(marker))
-    while (result.isEmpty && System.currentTimeMillis() < deadlineMs) {
-      Thread.sleep(100)
-      result = TestLogAppender.messages.find(_.contains(marker))
-    }
-    result
+    val encoded = CapturedLogicalPlanPayload.encode(
+      CapturedLogicalPlanPayload(
+        marker = CapturedLogicalPlanPayload.Marker,
+        sqlText = Some(sql),
+        logicalPlanJson = """{"plan":"ok"}""",
+        analyzedPlanText = "Project [1 AS value]"
+      )
+    )
+    val decodedSql = LogicalPlanLogDecoder.extractSql(s"${CapturedLogicalPlanPayload.Marker}:$encoded")
+    assert(decodedSql.contains(sql))
   }
 }

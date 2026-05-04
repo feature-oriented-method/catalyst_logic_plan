@@ -1,5 +1,7 @@
 # spark-logical-plan-capture-v2
 
+Repository: https://github.com/feature-oriented-method/catalyst_logic_plan
+
 PyPI-пакет для PySpark 3.5.x, который подключает Spark SQL extension:
 
 - перехватывает логические планы Catalyst

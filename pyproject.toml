@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spark-logical-plan-capture-v2"
-version = "0.1.0"
+version = "0.1.3"
 description = "PySpark package for Catalyst logical plan capture with Base64 logging marker SPARK_LOGICAL_PLAN_CAPTURE_V2."
 readme = "python/README_PYPI.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11,<3.12"
 license = "MIT"
 authors = [
   { name = "mtfer" }
@@ -19,19 +19,17 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Scientific/Engineering :: Information Analysis"
 ]
 dependencies = [
-  "pyspark>=3.5,<3.6"
+  "pyspark==3.5.2"
 ]
 
 [project.urls]
-Homepage = "https://example.com/spark-logical-plan-capture-v2"
-Repository = "https://example.com/spark-logical-plan-capture-v2"
+Homepage = "https://github.com/feature-oriented-method/catalyst_logic_plan"
+Repository = "https://github.com/feature-oriented-method/catalyst_logic_plan"
 
 [tool.hatch.build]
 sources = ["python/src"]
