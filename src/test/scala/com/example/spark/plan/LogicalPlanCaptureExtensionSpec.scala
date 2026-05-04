@@ -45,7 +45,7 @@ class LogicalPlanCaptureExtensionSpec extends AnyFunSuite with BeforeAndAfterAll
     spark.sql(sql).collect()
 
     val marker = CapturedLogicalPlanPayload.Marker + ":"
-    val encodedRecord = TestLogAppender.messages.find(_.contains(marker))
+    val encodedRecord = waitForEncodedRecord(marker)
     assert(encodedRecord.nonEmpty, "Expected captured logical plan marker in log output")
 
     val encoded = encodedRecord.get.substring(encodedRecord.get.indexOf(marker) + marker.length).trim
@@ -55,5 +55,15 @@ class LogicalPlanCaptureExtensionSpec extends AnyFunSuite with BeforeAndAfterAll
     assert(payload.sqlText.contains(sql))
     assert(payload.logicalPlanJson.nonEmpty)
     assert(payload.analyzedPlanText.contains("Project"))
+  }
+
+  private def waitForEncodedRecord(marker: String): Option[String] = {
+    val deadlineMs = System.currentTimeMillis() + 5000
+    var result = TestLogAppender.messages.find(_.contains(marker))
+    while (result.isEmpty && System.currentTimeMillis() < deadlineMs) {
+      Thread.sleep(100)
+      result = TestLogAppender.messages.find(_.contains(marker))
+    }
+    result
   }
 }
