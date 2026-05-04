@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "spark-logical-plan-capture-v2"
+version = "0.1.0"
+description = "PySpark package for Catalyst logical plan capture with Base64 logging marker SPARK_LOGICAL_PLAN_CAPTURE_V2."
+readme = "python/README_PYPI.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+  { name = "mtfer" }
+]
+keywords = ["spark", "pyspark", "catalyst", "sql", "logging", "base64"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Information Analysis"
+]
+dependencies = [
+  "pyspark>=3.5,<3.6"
+]
+
+[project.urls]
+Homepage = "https://example.com/spark-logical-plan-capture-v2"
+Repository = "https://example.com/spark-logical-plan-capture-v2"
+
+[tool.hatch.build]
+sources = ["python/src"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/src/spark_logical_plan_capture"]
+include = [
+  "python/src/spark_logical_plan_capture/jars/*.jar"
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "python/src/spark_logical_plan_capture/**",
+  "python/README_PYPI.md",
+  "python/LICENSE",
+  "python/NOTICE",
+  "src/main/scala/**",
+  "build.sbt",
+  "project/build.properties"
+]

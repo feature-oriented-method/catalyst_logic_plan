@@ -1,0 +1,7 @@
+target/
+project/target/
+dist/
+build/
+*.egg-info/
+python/src/spark_logical_plan_capture/jars/*.jar
+!python/src/spark_logical_plan_capture/jars/.gitkeep
